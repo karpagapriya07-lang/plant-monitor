@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jasmine Smart Monitoring</title>
+</head>
+<body>
+
+<h1>🌿 Jasmine Plant Monitoring Dashboard</h1>
+
+<h3>Temperature: <span id="temp"></span></h3>
+<h3>Soil Moisture: <span id="moisture"></span></h3>
+<h3>Humidity: <span id="humidity"></span></h3>
+<h3>Light Level: <span id="light"></span></h3>
+
+<h2>Prediction: <span id="prediction"></span></h2>
+
+<script>
+setInterval(() => {
+    fetch("/get_data")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("temp").innerText = data.temperature + " °C";
+            document.getElementById("moisture").innerText = data.moisture + " %";
+            document.getElementById("humidity").innerText = data.humidity + " %";
+            document.getElementById("light").innerText = data.light + " %";
+            document.getElementById("prediction").innerText = data.prediction;
+        });
+}, 3000);
+</script>
+
+</body>
+</html>

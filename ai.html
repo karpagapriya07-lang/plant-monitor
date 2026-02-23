@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plant Disease AI</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(135deg, #1d4350, #a43931);
+            text-align: center;
+            padding: 50px;
+            color: white;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            width: 400px;
+            margin: auto;
+        }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: lightgreen;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌿 Plant Disease Detection</h1>
+
+    <div class="card">
+        <input type="file" id="imageUpload">
+        <br><br>
+        <button onclick="predict()">Detect Disease</button>
+        <br><br>
+        <h3 id="result"></h3>
+    </div>
+
+<script>
+async function predict() {
+
+    const fileInput = document.getElementById("imageUpload");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please upload an image first.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+        const response = await fetch("http://127.0.0.1:5001/predict", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        document.getElementById("result").innerText =
+            "Disease: " + result.disease +
+            " | Confidence: " + (result.confidence * 100).toFixed(2) + "%";
+
+    } catch (error) {
+        console.error(error);
+        alert("Error connecting to backend.");
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🌱 Jasmine Smart Plant Monitoring</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h1>🌱 Jasmine Smart Plant Monitoring System</h1>
+
+<h2>📊 Live Sensor Data</h2>
+
+<p>Soil Moisture: <span id="soil">--</span> %</p>
+<p>Temperature: <span id="temp">--</span> °C</p>
+<p>Humidity: <span id="hum">--</span> %</p>
+<p>Light: <span id="light">--</span></p>
+
+<h2>🌿 Prediction</h2>
+<h3 id="prediction">--</h3>
+
+<canvas id="myChart" width="400" height="200"></canvas>
+
+<script>
+let soilData = [];
+let tempData = [];
+let labels = [];
+
+const ctx = document.getElementById('myChart').getContext('2d');
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [
+            {
+                label: 'Soil Moisture',
+                data: soilData,
+                borderWidth: 2
+            },
+            {
+                label: 'Temperature',
+                data: tempData,
+                borderWidth: 2
+            }
+        ]
+    }
+});
+
+function fetchData() {
+    fetch('/get_data')
+        .then(response => response.json())
+        .then(data => {
+            if (data.soil !== undefined) {
+
+                document.getElementById("soil").innerText = data.soil;
+                document.getElementById("temp").innerText = data.temp;
+                document.getElementById("hum").innerText = data.hum;
+                document.getElementById("light").innerText = data.light;
+                document.getElementById("prediction").innerText = data.prediction;
+
+                soilData.push(data.soil);
+                tempData.push(data.temp);
+                labels.push(new Date().toLocaleTimeString());
+
+                if (soilData.length > 10) {
+                    soilData.shift();
+                    tempData.shift();
+                    labels.shift();
+                }
+
+                chart.update();
+            }
+        });
+}
+
+setInterval(fetchData, 3000);
+</script>
+
+</body>
+</html>
