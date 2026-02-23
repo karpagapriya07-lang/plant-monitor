@@ -2,78 +2,59 @@
 <html>
 <head>
     <title>🌱 Jasmine Smart Plant Monitoring</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function loadData() {
+            const response = await fetch("/get_data");
+            const data = await response.json();
+
+            document.getElementById("temp").innerText = data.temperature;
+            document.getElementById("hum").innerText = data.humidity;
+            document.getElementById("soil").innerText = data.soil_percentage;
+            document.getElementById("light").innerText = data.light_value;
+            document.getElementById("time").innerText = data.timestamp;
+        }
+
+        async function predictHealth() {
+            const response = await fetch("/predict_health");
+            const data = await response.json();
+            document.getElementById("health").innerText = data.prediction;
+        }
+
+        async function uploadLeaf() {
+            const fileInput = document.getElementById("leaf");
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const response = await fetch("/predict_leaf", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            document.getElementById("leaf_result").innerText = data.prediction;
+        }
+
+        setInterval(loadData, 3000);
+    </script>
 </head>
-<body>
+<body onload="loadData()">
 
 <h1>🌱 Jasmine Smart Plant Monitoring System</h1>
 
 <h2>📊 Live Sensor Data</h2>
+Temperature: <span id="temp">0</span> °C <br>
+Humidity: <span id="hum">0</span> % <br>
+Soil Moisture: <span id="soil">0</span> % <br>
+Light Value: <span id="light">0</span> <br>
+Last Updated: <span id="time"></span> <br><br>
 
-<p>Soil Moisture: <span id="soil">--</span> %</p>
-<p>Temperature: <span id="temp">--</span> °C</p>
-<p>Humidity: <span id="hum">--</span> %</p>
-<p>Light: <span id="light">--</span></p>
+<button onclick="predictHealth()">Check Plant Health</button>
+<p id="health"></p>
 
-<h2>🌿 Prediction</h2>
-<h3 id="prediction">--</h3>
-
-<canvas id="myChart" width="400" height="200"></canvas>
-
-<script>
-let soilData = [];
-let tempData = [];
-let labels = [];
-
-const ctx = document.getElementById('myChart').getContext('2d');
-const chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: labels,
-        datasets: [
-            {
-                label: 'Soil Moisture',
-                data: soilData,
-                borderWidth: 2
-            },
-            {
-                label: 'Temperature',
-                data: tempData,
-                borderWidth: 2
-            }
-        ]
-    }
-});
-
-function fetchData() {
-    fetch('/get_data')
-        .then(response => response.json())
-        .then(data => {
-            if (data.soil !== undefined) {
-
-                document.getElementById("soil").innerText = data.soil;
-                document.getElementById("temp").innerText = data.temp;
-                document.getElementById("hum").innerText = data.hum;
-                document.getElementById("light").innerText = data.light;
-                document.getElementById("prediction").innerText = data.prediction;
-
-                soilData.push(data.soil);
-                tempData.push(data.temp);
-                labels.push(new Date().toLocaleTimeString());
-
-                if (soilData.length > 10) {
-                    soilData.shift();
-                    tempData.shift();
-                    labels.shift();
-                }
-
-                chart.update();
-            }
-        });
-}
-
-setInterval(fetchData, 3000);
-</script>
+<h2>🍃 Leaf Disease Detection</h2>
+<input type="file" id="leaf">
+<button onclick="uploadLeaf()">Upload & Predict</button>
+<p id="leaf_result"></p>
 
 </body>
 </html>
